@@ -19,11 +19,11 @@ total_spent = np.random.randint(50, 250, size=num_customers)
 
 # Create DataFrame
 data = pd.DataFrame(purchases, columns=['Shoes', 'Clothes', 'Laptops'])
-data['Total Amount Spent (in USD)'] = total_spent
+data['Total_Spent(USD)'] = total_spent
 data['Number of Purchases'] = data.sum(axis=1)
 if __name__ == '__main__':
 
-    X = data[['Shoes', 'Laptops', 'Total Amount Spent (in USD)', 'Clothes', 'Number of Purchases']]
+    X = data[['Shoes', 'Laptops', 'Total_Spent(USD)', 'Clothes', 'Number of Purchases']]
     for k in range(2, 11):
         kmeans = KMeans(n_clusters=k, init='k-means++', n_init=10, random_state=42)
         kmeans.fit(X)
@@ -50,5 +50,6 @@ if __name__ == '__main__':
     print(data)
 
     print("All The Customers In Cluster 1 : \n")
+    # same as  cluster2_customers = data[data.Cluster == 1]
     cluster2_customers = data[data["Cluster"] == 1]
     print(cluster2_customers)
