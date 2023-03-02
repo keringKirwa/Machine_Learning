@@ -13,10 +13,11 @@ data = {
 }
 df = pd.DataFrame(data)
 
-"""note that most functions in AI accept a 2D array , that is , in  form  of a  column .again , we set the random 
+""" Note that most functions in AI accept a 2D array , that is , in  form  of a  column .again , we set the random 
 state so that for the same input data, then we have the same output .y_Data in the case below is also a dataFrame.
 The feature names allows us to see how the rues are used eg salary<= 10000 is a rule , 
  we also set the className for each node of the tree , so that we are able  to see the  className of each node."""
+
 if __name__ == '__main__':
     newData = df.drop(columns=["Name"])
 

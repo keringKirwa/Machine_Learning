@@ -2,7 +2,6 @@ import pandas as pd
 from random import randint
 
 from scipy.sparse import csr_matrix
-from sklearn.preprocessing import OneHotEncoder
 
 data = {
     'Name': ['Tom', 'Joseph', 'Krish', 'John'],

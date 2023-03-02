@@ -16,21 +16,27 @@ if __name__ == '__main__':
     # drop redundant columns.in this code , the inplace named variable ensures that the original dataframe is modified,
     # rather than returning the modified version og the original one .
 
-    cols = ["Gender", "Name"]
-    dataFrame.drop(columns=cols, inplace=True)
-    dataFrame.set_index('User_ID', inplace=True)
+    cols = ["Name"]
+    dataFrame.drop(columns=cols, )
+    dataFrame.set_index('User_ID', )
 
     dependent_Variables = dataFrame.iloc[:, :-1]
     target_Variables = dataFrame.iloc[:, -1]
-    print(dependent_Variables)
-    print(target_Variables)
 
-    # note that in machine larning , the One Hot encoder will generate as many columns as the number  of features in the
-    # Gender column(each  column with the attribute name as in the data above.)
+    print("This is the result of the min() function : {}".format(target_Variables.min()))
+    print(target_Variables[1: 4])
 
-    print("One Hot Encoding....")
+    """ note that in machine larning , the One Hot encoder will generate as many columns as the number  of features in the
+     Gender column(each  column with the attribute name as in the data above.)"""
+
+    print("One Hot Encoding of The gender...")
+
     gender_encoder = OneHotEncoder()
     gender_encoded = gender_encoder.fit_transform(dataFrame[['Gender']])
     gender_encoded_df = pd.DataFrame(gender_encoded.toarray(), columns=['Female', 'Male'])
-    X = pd.concat([dataFrame.drop(['Gender'], axis=1), gender_encoded_df], axis=1)
-    print(X)
+
+    df = pd.concat([dependent_Variables, gender_encoded_df], axis=1)
+
+    finalDataFrame = df.drop(['Gender'], axis=1)
+    print(finalDataFrame)
+
