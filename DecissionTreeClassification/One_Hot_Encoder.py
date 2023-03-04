@@ -33,6 +33,9 @@ if __name__ == '__main__':
 
     gender_encoder = OneHotEncoder()
     gender_encoded = gender_encoder.fit_transform(dataFrame[['Gender']])
+    print(dataFrame)
+    print(gender_encoded)
+    print(gender_encoded.toarray())
     gender_encoded_df = pd.DataFrame(gender_encoded.toarray(), columns=['Female', 'Male'])
 
     df = pd.concat([dependent_Variables, gender_encoded_df], axis=1)

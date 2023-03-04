@@ -2,6 +2,11 @@ import numpy as np
 from keras.layers import Input, Embedding, Flatten, Dot, Concatenate, Dense
 from keras.models import Model
 from keras.optimizers import Adam
+"""
+Note that the Convolutional neural network (CNN) is a sequential  model , meaning : Each layer takes the output of the 
+previous layer as input and produces its own output, which is fed as input to the next layer. This sequential 
+arrangement allows the network to gradually learn and extract more complex features from the input data.
+"""
 
 num_users = 50
 num_movies = 100

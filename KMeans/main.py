@@ -51,5 +51,5 @@ if __name__ == '__main__':
 
     print("All The Customers In Cluster 1 : \n")
     # same as  cluster2_customers = data[data.Cluster == 1]
-    cluster2_customers = data[data["Cluster"] == 1]
+    cluster2_customers = data[data["Cluster"] == 0]
     print(cluster2_customers)
