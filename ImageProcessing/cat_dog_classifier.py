@@ -1,10 +1,14 @@
 import os
-
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import numpy as np # linear algebra
+import numpy as np
 from keras import layers, models
 from keras.preprocessing.image import ImageDataGenerator
+import logging
+"""Note the role of the tensorflow in this case is  to allow us get an image from the FileSystem , which=ch is 
+actuality stored in form of a matrix: the image flows in from the memory in form of a matrix , to manage this then we 
+use tensorflow."""
+
 
 EPOCHS = 10
 input_shape = (150, 150, 3)
@@ -16,6 +20,9 @@ train_dir = '/home/arapkering/Desktop/dogs-vs-cats/train'
 
 if __name__ == '__main__':
 
+    logger = tf.get_logger()
+    logger.setLevel(logging.ERROR)
+
     if not os.path.exists((os.path.join(train_dir, 'cat'))):
         os.mkdir(os.path.join(train_dir, 'cat'))
     if not os.path.exists((os.path.join(train_dir, 'dog'))):
@@ -24,9 +31,15 @@ if __name__ == '__main__':
     BATCH_SIZE = 100  # Number of training examples to process before updating our models variables
     IMG_SHAPE = 150
 
-    image_generator = ImageDataGenerator(rescale=1. / 255, validation_split=0.2)
+    image_generator = ImageDataGenerator(rescale=1. / 255, validation_split=0.4)
 
-    """the train_data_train_data_gen function returns an iterator on images"""
+    """
+    (1)The train_data_train_data_gen function returns an iterator on images. 
+    (2)Note that we had already defined how the data splitting will be done , and henge by using just one generator ,  
+    in every batch , we get 80 % as the  training data and he other 20 % as the testing data.
+    (4)All of these images have labels :Note they are read from the same dir but different sub_directories
+    (5)A single batch contains both dogs and cats.
+    """
 
     train_data_gen = image_generator.flow_from_directory(batch_size=BATCH_SIZE,
                                                          directory=train_dir,
@@ -44,7 +57,7 @@ if __name__ == '__main__':
 
     # the _ is used to ignore the labels Very IMPORTANT .
 
-    sample_training_images, _ = next(train_data_gen)
+    sample_training_images, _ = next(train_data_gen)  # gets the FIRST batch(first 200 images only) in the generator ,
 
 
     def plotImages(images_arr):
@@ -90,17 +103,19 @@ if __name__ == '__main__':
         dense1,
         dense2
     ])
+    """
+    model.compile(loss='binary_crossentropy',
+              optimizer=keras.optimizers.Adamax(lr=0.001),
+              metrics=['acc'])"""
 
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    """
-    (1)Note that the fit_generator is the one responsible for  getting  the next batch og image tensors , 
-    it calls the next() function . 
-    (2)The  fit() or the fit_generator will be fetching  data from the  
-    train_data_generator()
-    """
+    """(1)Note that the fit_generator is the one responsible for  getting  the next batch og image tensors , 
+    it calls the next() function . (2)The  fit() or the fit_generator will be fetching  data from the 
+    train_data_generator() steps_per_epoch == 200 , that means that for one epoch to be complete , then 200 batches @ 
+    with 100 images must have been attended to ."""
 
     history = model.fit_generator(
         train_data_gen,

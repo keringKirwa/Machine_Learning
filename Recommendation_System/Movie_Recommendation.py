@@ -2,36 +2,25 @@ import numpy as np
 from keras.layers import Input, Embedding, Flatten, Dot, Concatenate, Dense
 from keras.models import Model
 from keras.optimizers import Adam
-"""
-Note that the Convolutional neural network (CNN) is a sequential  model , meaning : Each layer takes the output of the 
-previous layer as input and produces its own output, which is fed as input to the next layer. This sequential 
-arrangement allows the network to gradually learn and extract more complex features from the input data.
-"""
 
-num_users = 50
-num_movies = 100
-
-embedding_size = 32
-
-# Create input layers for user and movie IDs.The input layer of the neaural network accepts an array/tensor with one
-# dimension , and one element at a time eg [10],then  [20] ...
+embedding_size = 48
+num_users = 100
+num_movies = 30
 
 user_input = Input(shape=(1,))
 movie_input = Input(shape=(1,))
-
 age_input = Input(shape=(1,))
 gender_input = Input(shape=(1,))
 
-user_embedding = Embedding(input_dim=num_users, output_dim=embedding_size)(user_input)
-movie_embedding = Embedding(input_dim=num_movies, output_dim=embedding_size)(movie_input)
+movie_embedding = Embedding(input_dim=num_movies, output_dim=48)(movie_input)
 
-age_embedding = Embedding(input_dim=100, output_dim=embedding_size)(age_input)
-gender_embedding = Embedding(input_dim=2, output_dim=embedding_size)(gender_input)
-
+# users
+user_embedding = Embedding(input_dim=num_users, output_dim=16)(user_input)
+age_embedding = Embedding(input_dim=100, output_dim=16)(age_input)
+gender_embedding = Embedding(input_dim=2, output_dim=16)(gender_input)
 
 user_embedding = Flatten()(user_embedding)
 movie_embedding = Flatten()(movie_embedding)
-
 age_embedding = Flatten()(age_embedding)
 gender_embedding = Flatten()(gender_embedding)
 
@@ -40,32 +29,34 @@ movie_embedding = Concatenate()([movie_embedding])
 
 rating = Dot(axes=-1)([user_embedding, movie_embedding])
 
-# Combine all inputs and outputs into a single model
 model = Model(inputs=[user_input, movie_input, age_input, gender_input], outputs=rating)
 
-# Compile the model with a mean squared error loss function and an Adam optimizer
 model.compile(loss='mse', optimizer=Adam(lr=0.001))
 
-"""Generate some example data"""
 user_ids = np.random.randint(num_users, size=30)
 movie_ids = np.random.randint(num_movies, size=30)
 ages = np.random.randint(18, 60, size=30)
 genders = np.random.randint(2, size=30)
 ratings = np.random.randint(1, 6, size=30)
 
-# Fit the model on the example data
+print("user_ids", user_ids.shape)
+print(movie_ids.shape)
+print(ages.shape)
+print(genders.shape)
+
 model.fit([user_ids, movie_ids, ages, genders], ratings, epochs=10, batch_size=10, verbose=2)
-print(model.predict())
+my_array = np.array([30, 40, 25, 18])
 
+"""
+Note the following arrays are of the shape (4, 1) , meaning , they have 4 rows and 1 n column"""
+test_users = np.array([[24], [30], [45], [50]])
+test_movies = np.array([[24], [10], [29], [10]])
+ratings = model.predict(
+    [test_users, test_movies, np.array([[30], [40], [25], [18]]), np.array([[0], [1], [1], [0]])])
+print(ratings)
 if __name__ == '__main__':
-
-    test_users = [24, 30, 45, 50]
-    test_movies = [90, 88, 67, 10]
-    ratings = model.predict([test_users, test_movies])
-    print(ratings)
-
     for i in range(4):
-        print("User {} is predicted to rate movie {} as {:.2f} out of 5".format(
-            test_users[i], test_movies[i], ratings[i]))
+        print("User {} is predicted to rate movie {} as {} out of 5".format(
+            test_users[i][0], test_movies[i][0], ratings[i]))
 
 # Print the predicted ratings
