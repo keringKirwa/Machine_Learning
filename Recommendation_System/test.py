@@ -13,8 +13,8 @@ num_movies = 100
 
 embedding_size = 16
 
-# Create input layers for user and movie IDs.The input layer of the neaural network accepts an array/tensor with one
-# dimension , and one element at a time eg [10],then  [20] ...
+# Create input layers for user and movie IDs.The input layer of the neural network accepts an array/tensor with one
+# dimension , and one element at a time eg [[10], [20]] ---> [10], [20] and so on ...
 
 user_input = Input(shape=(1,))
 movie_input = Input(shape=(1,))

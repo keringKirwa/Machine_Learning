@@ -68,6 +68,13 @@ print(ratings)
 
 
 def prediction_for_one_user(user_id, movie_id, user_age, user_gender):
+    """
+    The function below tells numpy that the new array will have 1 column , teh -1 tells it to automatically calculate
+    the number of rows so that all the items will fit into the one column. This converts a 1D array to a 2D array.
+    teh dimension of an array refers to the number of indices needed to access an item in that array , fir example in the
+    array [15, 12, 1], then I can access the first item using : array[0], but int the array  [[1, 2],[3, 4],[5, 6]], i need
+    to access 1, then I will use 2 dimensions array[0][0] :
+    """
     user_id = np.array([[user_id]])
     user_age = np.array([[user_age]])
     user_gender = np.array([[user_gender]])

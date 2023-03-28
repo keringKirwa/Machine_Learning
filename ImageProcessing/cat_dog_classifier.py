@@ -131,8 +131,3 @@ if __name__ == '__main__':
 
     loss = history.history['loss']
     val_loss = history.history['val_loss']
-
-    # img = mpimg.imread(dataset_dir + '11.jpg')
-    # # Show image using Matplotlib
-    # plt.imshow(img)
-    # plt.show()

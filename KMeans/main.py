@@ -3,11 +3,15 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
-""""
-(1) Note that we set the n_init variable to a constant 10 ,  meaning that the algorithm will run 10 times , witht 
-different initial centroids, a large value  guarantees good results, but with great computational power
-(2) Set random seed for reproducibility
-(3) To check the type of an item in Python , then i user the built in type type()  function"""
+"""" (1) Note that we set the n_init variable to a constant 10 ,  meaning that the algorithm will run 10 times , 
+witht different initial centroids, a large value  guarantees good results, but with great computational power (2) Set 
+random seed for reproducibility (3) To check the type of an item in Python , then i user the built in type type()  
+function. (4)K-means++ is a smart initialization method that tries to place the centroids in a way that speeds up the 
+convergence of the algorithm. It does this by selecting the first centroid randomly from the data points, 
+and then selecting subsequent centroids from the remaining data points in a way that MAXIMIZES the minimum distance 
+between each centroid and the other centroids that have been selected so far. This ensures that the centroids are 
+well-spaced and avoids the problem of initializing centroids in close proximity to each other, which can lead to 
+suboptimal clustering results.(5) teh number of centroids chosen is the same as the  number of clusters provided."""
 
 np.random.seed(42)
 
