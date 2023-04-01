@@ -10,6 +10,13 @@ pd.set_option('display.max_colwidth', None)
 df = pd.read_excel("/home/arapkering/Downloads/churn_prediction.xlsx", sheet_name='E Comm')
 
 
+def predict_churn(customer_details, model):
+    new_instance_df = pd.DataFrame([customer_details])
+    df_encoded = label_encoder(new_instance_df, ["PreferedOrderCat", "Gender"])
+
+    return model.predict(df_encoded)[0]
+
+
 def label_encoder(main_data_frame, categorical_cols):
     df_to_encode = main_data_frame[categorical_cols]
     naive_label_encoder = LabelEncoder()
@@ -39,15 +46,26 @@ if __name__ == '__main__':
     X_main_data = numericalDF.drop(["Churn"], axis=1)
     X_train, X_test, y_train, y_test = train_test_split(X_main_data, classes, test_size=0.2, random_state=42)
 
-    # Train a Naive Bayes classifier
+    print("Testing if data  has any Nan value :\n", X_test.isna().any())
+
+    # Training the Naive Bayes classifier
+
     nb = GaussianNB()
-    print(X_train.isna().any())
-    print(" testing  data  has any Nan  vaue : ", X_test.isna().any())
     nb.fit(X_train, y_train)
 
-    # Make predictions on the test set
     y_pred = nb.predict(X_test)
 
-    # Evaluate the accuracy of the model
+    # Model Evaluation
     accuracy = accuracy_score(y_test, y_pred)
     print('Accuracy:', accuracy)
+
+    instance = {
+        "NumberOfDeviceRegistered": 2,
+        "PreferedOrderCat": "Mobiles",
+        "Tenure": 10,
+        "Gender": "Female",
+        "OrderCount": 3
+    }
+
+    prediction_for_one_customer = predict_churn(instance, nb)
+    print("prediction for one Customer :: {}".format(prediction_for_one_customer))
