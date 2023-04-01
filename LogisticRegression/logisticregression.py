@@ -25,6 +25,7 @@ def generate_data(num_points):
 
     X = dataFrame[['age', 'income']]
     y = dataFrame['purchased']
+    print("this is the y data :::: ", y)
 
     """Note  that the  splitting and scaling  the data  in this case happen in dataFrame levels . Split data into 
     training and testing dataFrames.
@@ -48,13 +49,9 @@ def generate_data(num_points):
     predictionTestResults = model.predict(X_test_scaled)
     print(predictionTestResults)
     print("The predicted value is : {}".format(prediction))
-
-    # Plot data
-    plt.scatter(X_test['age'], X_test['income'], c=y_test, cmap='bwr', alpha=0.6)
-    plt.xlabel('Age')
-    plt.ylabel('Income')
-    plt.title('Scatter Plot of Age vs. Income')
-    plt.show()
+    """Note that for the class variables, we access them using a single bracket eg dataFrame["purchased"] , 
+    pass it to the model as pandas series (1D array ) rather than  a dataFrame. The model then returns a common array 
+    as the data predicated."""
 
 
 # Call function

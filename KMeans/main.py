@@ -42,18 +42,16 @@ if __name__ == '__main__':
 
     """Adding the generated cluster column to the  dataframe.The Kmeans.labels_ contain the  info for the  @customer ,  
     the  cluster label  for each customer, its an array whose length is the same as that of the customers 
+    Kmeans will always label the  data it has classified.
     """
 
     data['Cluster'] = kmeans.labels_
-    print(kmeans.labels_)
-
-    print("The length is : ", len(kmeans.labels_))
 
     cluster_stats = data.groupby('Cluster').mean()
     print("Cluster Statistics based on the MEAN :\n", cluster_stats)
     print(data)
 
-    print("All The Customers In Cluster 1 : \n")
+    print("All The Customers In Cluster 2(index 1) : \n")
     # same as  cluster2_customers = data[data.Cluster == 1]
-    cluster2_customers = data[data["Cluster"] == 0]
+    cluster2_customers = data[data["Cluster"] == 1]
     print(cluster2_customers)
