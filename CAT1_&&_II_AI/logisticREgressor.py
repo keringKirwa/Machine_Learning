@@ -24,6 +24,7 @@ def label_encoder(main_data_frame, categorical_cols):
     return pd.concat([main_data_frame.drop(categorical_cols, axis=1), df_encoded], axis=1)
 
 
+
 def one_hot_encoder(dataframe, categorical_cols, drop_first=False):
     dataframe = pd.get_dummies(dataframe, columns=categorical_cols, drop_first=drop_first)
     return dataframe

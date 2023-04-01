@@ -12,6 +12,13 @@ pd.set_option('display.max_colwidth', None)
 
 df = pd.read_excel("/home/arapkering/Downloads/churn_prediction.xlsx", sheet_name='E Comm')
 
+"""Note  (1)The  model  will be fed with  both the x and y data , which  too  have to be processed.(2) An transformer 
+is  used in modifying hte data. (3) an estimator is used in learning from the data.Pipelines chain together processes 
+that are applied t the entire dataset.In the case when we want  to apply a transformer to only one or some  column(s) 
+, then we use a ColumnTransformer().Again note , we dont want to  scale  the  one hot encoded values ,  therefore the 
+StandardScaler will and MUST always  come before  the OneHotEncoder. Every transformer must have a name  eg (scaler, 
+onehot) in the  cases below and so on .they will  be used to refer to the transformers later in the program."""
+
 
 def predict_churn(customer_details, model):
     new_instance_df = pd.DataFrame([customer_details])
@@ -66,4 +73,6 @@ if __name__ == '__main__':
     }
 
     prediction_for_one_customer = predict_churn(instance, lr_pipe)
+    lr_pipe.named_steps["logistic_regression"].predict(instance)
+    print("sth very cool here :: ", lr_pipe.named_steps["logistic_regression"].predict(instance))
     print("Prediction for one Customer: {}".format(prediction_for_one_customer))
