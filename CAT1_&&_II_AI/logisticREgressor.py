@@ -19,10 +19,10 @@ def predict_churn(customer_details, model):
 
 def label_encoder(main_data_frame, categorical_cols):
     df_to_encode = main_data_frame[categorical_cols]
+    print(data_frame_of_interest)
     naive_label_encoder = LabelEncoder()
     df_encoded = df_to_encode.apply(naive_label_encoder.fit_transform)
     return pd.concat([main_data_frame.drop(categorical_cols, axis=1), df_encoded], axis=1)
-
 
 
 def one_hot_encoder(dataframe, categorical_cols, drop_first=False):
@@ -60,13 +60,12 @@ if __name__ == '__main__':
     print('Accuracy:', accuracy)
 
     instance = {
-        "NumberOfDeviceRegistered": 2,
-        "PreferedOrderCat": "Mobiles",
-        "Tenure": 10,
-        "Gender": "Female",
-        "OrderCount": 3
+        "NumberOfDeviceRegistered": 5,
+        "PreferedOrderCat": "Fashion",
+        "Tenure": 13,
+        "Gender": "Male",
+        "OrderCount": 2
     }
 
     prediction_for_one_customer = predict_churn(instance, lr)
-    print("Prediction for one Customer: {}".format(prediction_for_one_customer))
-
+    print("Prediction for this Customer: {}".format(prediction_for_one_customer))

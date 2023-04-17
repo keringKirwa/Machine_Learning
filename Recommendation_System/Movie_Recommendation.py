@@ -7,34 +7,43 @@ embedding_size = 48
 num_users = 100
 num_movies = 30
 
-user_input = Input(shape=(1,))
-movie_input = Input(shape=(1,))
+# INPUTS
+
+user_id_input = Input(shape=(1,))
 age_input = Input(shape=(1,))
 gender_input = Input(shape=(1,))
 
-movie_embedding = Embedding(input_dim=num_movies, output_dim=48)(movie_input)
+rated_movie_input = Input(shape=(1,))
+other_movies_input = Input(shape=(10,), name='other_liked_movies')
 
-# users
-user_embedding = Embedding(input_dim=num_users, output_dim=16)(user_input)
+"""NOTE: if a user has rated less than 10 movies, the input sequence will be padded with a special token to make it of 
+length 10"""
+
+# EMBEDDINGS
+user_id_embedding = Embedding(input_dim=num_users, output_dim=16)(user_id_input)
 age_embedding = Embedding(input_dim=100, output_dim=16)(age_input)
 gender_embedding = Embedding(input_dim=2, output_dim=16)(gender_input)
 
-user_embedding = Flatten()(user_embedding)
-movie_embedding = Flatten()(movie_embedding)
+rated_movie_embedding = Embedding(input_dim=num_movies, output_dim=48)(rated_movie_input)
+# input_dim=len(movie_data['movie_id'].unique()).We are expecting an array of length 10 , hence input length is set
+# to 10
+other_movies_embedding = Embedding(input_dim=num_movies, output_dim=10, input_length=10)(other_movies_input
+                                                                                         )
+
+# FLATTENING LAYERS
+user_id_embedding = Flatten()(user_id_embedding)
 age_embedding = Flatten()(age_embedding)
 gender_embedding = Flatten()(gender_embedding)
 
-user_embedding = Concatenate()([user_embedding, age_embedding, gender_embedding])
-movie_embedding = Concatenate()([movie_embedding])
-"""
-Note that fir two vectors to be concatenated along the axis =-1(concatenate the rows) , then they must have they
-must have  the same number  of rows .(like we are bringing the first row and the second one together )
-Again note that we will be passing the details of a user and a movie  as a row , now a column.
-"""
+rated_movie_embedding = Flatten()(rated_movie_embedding)
+other_movies_embedding = Flatten()(other_movies_embedding)
 
-rating = Dot(axes=-1)([user_embedding, movie_embedding])
+combined_embedding = Concatenate()([user_id_embedding, age_embedding, gender_embedding, rated_movie_embedding, other_movies_embedding])
 
-model = Model(inputs=[user_input, movie_input, age_input, gender_input], outputs=rating)
+"""Note that in a recommendation system , we are only working  with the tensors/arrays.This means that we cant pass 
+integers , such as age=25 , instead , we pass it as a tensor such as age=np.array([25])"""
+
+model = Model(inputs=[user_id_input, rated_movie_input, age_input, gender_input], outputs=rating)
 
 model.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
 
@@ -52,14 +61,6 @@ print(genders.shape)
 model.fit([user_ids, movie_ids, ages, genders], ratings, epochs=10, batch_size=10, verbose=2)
 my_array = np.array([30, 40, 25, 18])
 
-"""
-Note the following arrays are of the shape (4, 1) , meaning , they have 4 rows and 1 n column
-the array np.array([[24], [30], [45], [50]]) also  has a shape of (4,1).
-Note that in machine learning , we are dealing with teh flow of tensors (matrices): and not individual values , the 
- id of the user will enter  the model's input layer as a matrix of size (1,1) eg [10]
- the model.fit() function accepts a tensor .
-"""
-
 test_users = np.array([[24], [30], [45], [50]])
 test_movies = np.array([[24], [10], [29], [10]])
 ratings = model.predict(
@@ -67,18 +68,11 @@ ratings = model.predict(
 print(ratings)
 
 
-def prediction_for_one_user(user_id, movie_id, user_age, user_gender):
-    """
-    The function below tells numpy that the new array will have 1 column , teh -1 tells it to automatically calculate
-    the number of rows so that all the items will fit into the one column. This converts a 1D array to a 2D array.
-    teh dimension of an array refers to the number of indices needed to access an item in that array , fir example in the
-    array [15, 12, 1], then I can access the first item using : array[0], but int the array  [[1, 2],[3, 4],[5, 6]], i need
-    to access 1, then I will use 2 dimensions array[0][0] :
-    """
+def prediction_for_one_user(user_id, movie_ids, user_age, user_gender):
     user_id = np.array([[user_id]])
     user_age = np.array([[user_age]])
     user_gender = np.array([[user_gender]])
-    movie_id = np.array(movie_id)
+    movie_id = np.array(movie_ids)
     movie_id = movie_id.reshape(-1, 1)
     one_user_rating = model.predict([user_id, np.array([[movie_id[0]]]), user_age, user_gender])
     print("rating  for one user :", one_user_rating)
