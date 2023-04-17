@@ -1,87 +1,91 @@
-import numpy as np
-from keras.layers import Input, Embedding, Flatten, Dot, Concatenate, Dense
+from keras.layers import Input, Embedding, Concatenate, Dense, Flatten
 from keras.models import Model
-from keras.optimizers import Adam
 
-embedding_size = 48
-num_users = 100
-num_movies = 30
+num_users = 1000
+num_movies = 1200
+num_genres = 10
+num_characters=256
 
-# INPUTS
+# Define input layers
 
-user_id_input = Input(shape=(1,))
-age_input = Input(shape=(1,))
-gender_input = Input(shape=(1,))
+user_id_input = Input(
+    shape=[1],
+    name='user_id_input')
 
-rated_movie_input = Input(shape=(1,))
-other_movies_input = Input(shape=(10,), name='other_liked_movies')
+user_age_input = Input(
+    shape=[1],
+    name='user_age_input')
 
-"""NOTE: if a user has rated less than 10 movies, the input sequence will be padded with a special token to make it of 
-length 10"""
+user_gender_input = Input(
+    shape=[1],
+    name='user_gender_input')
 
-# EMBEDDINGS
-user_id_embedding = Embedding(input_dim=num_users, output_dim=16)(user_id_input)
-age_embedding = Embedding(input_dim=100, output_dim=16)(age_input)
-gender_embedding = Embedding(input_dim=2, output_dim=16)(gender_input)
+user_liked_movies_input = Input(
+    shape=[5],
+    name='user_liked_movies_input')
 
-rated_movie_embedding = Embedding(input_dim=num_movies, output_dim=48)(rated_movie_input)
-# input_dim=len(movie_data['movie_id'].unique()).We are expecting an array of length 10 , hence input length is set
-# to 10
-other_movies_embedding = Embedding(input_dim=num_movies, output_dim=10, input_length=10)(other_movies_input
-                                                                                         )
+movie_id_input = Input(shape=[1], name='movie_id_input')
+movie_genre_input = Input(shape=[1], name='movie_genre_input')
+movie_characters_input = Input(shape=[5], name='movie_characters_input')
 
-# FLATTENING LAYERS
-user_id_embedding = Flatten()(user_id_embedding)
-age_embedding = Flatten()(age_embedding)
-gender_embedding = Flatten()(gender_embedding)
+# Define embedding layers
 
-rated_movie_embedding = Flatten()(rated_movie_embedding)
-other_movies_embedding = Flatten()(other_movies_embedding)
+user_id_embedding = Embedding(
+    input_dim=num_users,
+    output_dim=10,
+    name='user_id_embedding')(user_id_input)
 
-combined_embedding = Concatenate()([user_id_embedding, age_embedding, gender_embedding, rated_movie_embedding, other_movies_embedding])
+user_age_embedding = Embedding(
+    input_dim=100,
+    output_dim=5,
+    name='user_age_embedding')(user_age_input)
 
-"""Note that in a recommendation system , we are only working  with the tensors/arrays.This means that we cant pass 
-integers , such as age=25 , instead , we pass it as a tensor such as age=np.array([25])"""
+user_gender_embedding = Embedding(input_dim=2, output_dim=3, name='user_gender_embedding')(user_gender_input)
+user_liked_movies_embedding = Embedding(input_dim=num_movies, output_dim=10, name='user_liked_movies_embedding')(
+    user_liked_movies_input)
+movie_id_embedding = Embedding(input_dim=num_movies, output_dim=10, name='movie_id_embedding')(movie_id_input)
+movie_genre_embedding = Embedding(input_dim=num_genres, output_dim=3, name='movie_genre_embedding')(movie_genre_input)
+movie_characters_embedding = Embedding(input_dim=num_characters, output_dim=5, name='movie_characters_embedding')(
+    movie_characters_input)
 
-model = Model(inputs=[user_id_input, rated_movie_input, age_input, gender_input], outputs=rating)
+# Concatenate embeddings
+user_embedding = Concatenate(name='user_embedding')(
+    [user_id_embedding, user_age_embedding, user_gender_embedding, user_liked_movies_embedding])
+movie_embedding = Concatenate(name='movie_embedding')(
+    [movie_id_embedding, movie_genre_embedding, movie_characters_embedding])
 
-model.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
+# Compute dot product and flatten
+dot_product = Flatten()(Concatenate()([user_embedding, movie_embedding]))
 
-user_ids = np.random.randint(num_users, size=30)
-movie_ids = np.random.randint(num_movies, size=30)
-ages = np.random.randint(18, 60, size=30)
-genders = np.random.randint(2, size=30)
-ratings = np.random.randint(1, 6, size=30)
+# Define output layer
+output = Dense(units=1, activation='linear', name='output')(dot_product)
 
-print("user_ids", user_ids.shape)
-print(movie_ids.shape)
-print(ages.shape)
-print(genders.shape)
+# Define model
+model = Model(inputs=[user_id_input, user_age_input, user_gender_input, user_liked_movies_input, movie_id_input,
+                      movie_genre_input, movie_characters_input], outputs=output)
 
-model.fit([user_ids, movie_ids, ages, genders], ratings, epochs=10, batch_size=10, verbose=2)
-my_array = np.array([30, 40, 25, 18])
-
-test_users = np.array([[24], [30], [45], [50]])
-test_movies = np.array([[24], [10], [29], [10]])
-ratings = model.predict(
-    [test_users, test_movies, np.array([[30], [40], [25], [18]]), np.array([[1], [1], [1], [0]])])
-print(ratings)
+# Compile model
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mean_absolute_error'])
 
 
-def prediction_for_one_user(user_id, movie_ids, user_age, user_gender):
-    user_id = np.array([[user_id]])
-    user_age = np.array([[user_age]])
-    user_gender = np.array([[user_gender]])
-    movie_id = np.array(movie_ids)
-    movie_id = movie_id.reshape(-1, 1)
-    one_user_rating = model.predict([user_id, np.array([[movie_id[0]]]), user_age, user_gender])
-    print("rating  for one user :", one_user_rating)
+# Define function to predict rating for one user and one movie
+def predict_rating_for_one_user(user_id, user_age, user_gender, user_liked_movies, movie_id, movie_genre,
+                                movie_characters):
+    user_id_input = [[user_id]]
+    user_age_input = [[user_age]]
+    user_gender_input = [[user_gender]]
+    user_liked_movies_input = [user_liked_movies]
+    movie_id_input = [[movie_id]]
+    movie_genre_input = [[movie_genre]]
+    movie_characters_input = [movie_characters]
+    prediction = model.predict(
+        [user_id_input, user_age_input, user_gender_input, user_liked_movies_input, movie_id_input, movie_genre_input,
+         movie_characters_input])[0][0]
+    return prediction
 
 
 if __name__ == '__main__':
-    for i in range(4):
-        print("User {} is predicted to rate movie {} as {} out of 5".format(
-            test_users[i][0], test_movies[i][0], ratings[i]))
-    prediction_for_one_user(87, [15, 12, 1], 13, 1)
+    print("This is the main function.")
 
-# Print the predicted ratings
+
+

@@ -1,43 +1,49 @@
-import numpy as np
-from keras.layers import Input, Embedding, Dot, Flatten
+from keras.layers import Input, Embedding, Flatten, Dot, Concatenate
 from keras.models import Model
 
-# define number of users, movies, and embedding dimensions
-num_users = 100
-num_movies = 30
-embedding_size = 48
 
-# define inputs
-user_id_input = Input(shape=(1,))
-movie_id_input = Input(shape=(1,))
+data = [{'user': {'id': 1001, 'age': 25, 'likeMovies': [18, 25, 357, 395000], 'gender': 'male'},
+         'movie': {'id': 8989, 'genre': 'education', 'characters': ['james pater', 'David', 'Saul', 'Mike']},
+         'rating': 3},
 
-# define user and movie embeddings
-user_embedding = Embedding(input_dim=num_users, output_dim=embedding_size)(user_id_input)
-movie_embedding = Embedding(input_dim=num_movies, output_dim=embedding_size)(movie_id_input)
+        {'user': {'id': 1002, 'age': 30, 'likeMovies': [25, 35, 67, 123, 765], 'gender': 'female'},
+         'movie': {'id': 2345, 'genre': 'action', 'characters': ['Tom', 'John', 'Mary', 'Samantha']},
+         'rating': 4},
 
-# dot product of user and movie embeddings
-dot_product = Dot(axes=-1)([user_embedding, movie_embedding])
+        {'user': {'id': 1003, 'age': 20, 'likeMovies': [18, 35, 67, 123, 8989], 'gender': 'male'},
+         'movie': {'id': 395000, 'genre': 'comedy', 'characters': ['Steve', 'Linda', 'Joe', 'Rachel']},
+         'rating': 5},
+        ]
 
-# flatten the dot product tensor
-flatten = Flatten()(dot_product)
+num_users = len(set([d['user']['id'] for d in data]))
+num_movies = len(set([d['movie']['id'] for d in data]))
 
-# define the model
-model = Model(inputs=[user_id_input, movie_id_input], outputs=flatten)
+user_id_input = Input(shape=[1], name='user_id_input')
+movie_id_input = Input(shape=[1], name='movie_id_input')
 
-# compile the model
+user_embedding = Embedding(input_dim=num_users, output_dim=10, name='user_embedding')(user_id_input)
+movie_embedding = Embedding(input_dim=num_movies, output_dim=10, name='movie_embedding')(movie_id_input)
+
+user_flattened = Flatten()(user_embedding)
+movie_flattened = Flatten()(movie_embedding)
+
+concatenated = Concatenate()([user_flattened, movie_flattened])
+
+dot_product = Dot(axes=1)([user_flattened, movie_flattened])
+
+model = Model(inputs=[user_id_input, movie_id_input], outputs=dot_product)
+
 model.compile(loss='mse', optimizer='adam')
 
-# generate some dummy data for training
-users = np.random.randint(num_users, size=1000)
-movies = np.random.randint(num_movies, size=1000)
-ratings = np.random.randint(1, 6, size=1000)
+users = [d['user']['id'] for d in data]
+movies = [d['movie']['id'] for d in data]
+ratings = [d['rating'] for d in data]
 
-# train the model
+# fit the model on the input data
 model.fit([users, movies], ratings, epochs=10, batch_size=32)
 
-# make a prediction for a user-movie pair
-user_id = np.array([10])
-movie_id = np.array([5])
-rating = model.predict([user_id, movie_id])
 
-print("The predicted rating for user {} and movie {} is {}".format(user_id[0], movie_id[0], rating[0]))
+"""TRAIN THE MODE: we pass (users and ratings as inputs) and the ground truth(Ratings) to the model; for any dot 
+product between  the  users and the movie ratings , the output is compared to the ground truth and any errors back 
+propagated.This means that the ratings will be compared to  the outputs=flatten in the model."""
+
