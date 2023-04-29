@@ -22,6 +22,12 @@ onehot) in the  cases below and so on .they will  be used to refer to the transf
 
 def predict_churn(customer_details, model):
     new_instance_df = pd.DataFrame([customer_details])
+    print(new_instance_df.shape)
+    print(new_instance_df)
+    # if new_instance_df.shape[0] == 1:
+    #     new_instance_df.reshape(1, -1)
+    # elif new_instance_df.shape[1] == 1:
+    #     # new_instance_df.reshape(-1, 1)
     return model.predict(new_instance_df)[0]
 
 
@@ -55,6 +61,8 @@ if __name__ == '__main__':
     y = data_frame_of_interest['Churn']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    print(X_test.shape)
 
     lr_pipe.fit(X_train, y_train)
 
